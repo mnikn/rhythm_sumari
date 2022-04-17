@@ -253,6 +253,7 @@ func _ready():
 	
 	$WaterSoundEffectPlayer.play()
 	
+	$Enemy/AnimationPlayer.play("idle")
 	var animatopm_player = $Player/AnimationPlayer
 	$Player/AnimationPlayer.connect("animation_finished", 
 		func (anim):
@@ -313,8 +314,14 @@ func play_hit(type = "heavy"):
 	)
 	
 	for node in $ActionPanel/Container.get_children():
-		if node.position.x >= 30 and node.position.x <= 45:
+		if node.position.x >= 30 and node.position.x <= 50:
 			node.queue_free()
+
+	var enemy_player = $Enemy/AnimationPlayer
+	$Enemy/AnimationPlayer.play("hit")
+	self.get_tree().create_timer(0.1).connect("timeout", func():
+		enemy_player.play("idle")
+	)
 	
 	node.play()
 	await node.finished
