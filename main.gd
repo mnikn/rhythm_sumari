@@ -42,6 +42,13 @@ func _ready():
 	$BgmPlayer.play()
 	
 	$WaterSoundEffectPlayer.play()
+	
+	var animatopm_player = $Player/AnimationPlayer
+	$Player/AnimationPlayer.connect("animation_finished", 
+		func (anim):
+			if anim != "idle":
+				animatopm_player.play("idle") 
+	)
 
 	self.start_rhythm()
 
@@ -57,8 +64,10 @@ func play_hit(type = "heavy"):
 	self.add_child(node)
 	if type == "light":
 		node.stream = hit_light
+		$Player/AnimationPlayer.play("light_attack")
 	else:
 		node.stream = hit_heavy
+		$Player/AnimationPlayer.play("heavy_attack")
 	node.play()
 	await node.finished
 	node.queue_free()
