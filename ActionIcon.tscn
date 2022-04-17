@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://cy15j6ae8j0g8"]
+
+[ext_resource type="Texture2D" uid="uid://dw0hoo7qwgwvv" path="res://assets/ui/heavy_action.png" id="1_t6qnu"]
+[ext_resource type="Script" path="res://ActionIcon.gd" id="2_2cqmt"]
+
+[node name="ActionIcon" type="TextureRect"]
+texture_filter = 1
+anchor_top = 0.25
+anchor_bottom = 0.25
+offset_right = 24.0
+offset_bottom = 24.0
+size_flags_horizontal = 0
+texture = ExtResource( "1_t6qnu" )
+script = ExtResource( "2_2cqmt" )
+metadata/_edit_layout_mode = 1
+metadata/_edit_use_custom_anchors = true

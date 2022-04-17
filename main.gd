@@ -9,6 +9,9 @@ var song1 = preload("res://assets/musics/bgm/song_1.wav")
 var hit_heavy = preload("res://assets/musics/sound_effects/hit_heavy.wav")
 var hit_light = preload("res://assets/musics/sound_effects/hit_light.wav")
 
+var icon_heavy = preload("res://assets/ui/heavy_action.png")
+var icon_light = preload("res://assets/ui/light_action.png")
+
 var pb = 60.0 / 130.0
 
 var rhythm_part1_partern = {
@@ -219,6 +222,8 @@ var rhythm_part10_partern = {
 
 var rhythm = {}
 
+var ActionIconScene = preload("res://ActionIcon.tscn")
+
 func _ready():
 	dict_assin(rhythm_part2_partern, self.duplicate_next_rhythm_patern(rhythm_part2_partern))
 	dict_assin(rhythm_part3_partern, self.duplicate_next_rhythm_patern(rhythm_part3_partern))
@@ -259,10 +264,33 @@ func _ready():
 
 func start_rhythm():
 	for per in self.rhythm.keys():
-		var timer = self.get_tree().create_timer(per.to_float() * pb)
-		var player_hit = self.play_hit
+		var timer = self.get_tree().create_timer((per.to_float() - 7.7) * pb)
+		var create_action_icon = self.create_action_icon
 		var hit_type = self.rhythm[per]
-		timer.connect("timeout", func (): player_hit.call(hit_type))
+		timer.connect("timeout", func (): 
+			create_action_icon.call(hit_type)
+		)
+
+		# debug code
+#		var player_hit = self.play_hit
+#		var timer2 = self.get_tree().create_timer(per.to_float() * pb)
+#		timer2.connect("timeout", func (): 
+#			player_hit.call(hit_type)
+#		)
+
+func create_action_icon(type):
+	var node = self.ActionIconScene.instantiate()
+	node.position.x = 580
+	if type == "heavy":
+		node.texture = self.icon_heavy
+	else:
+		node.texture = self.icon_light
+	var tween = create_tween()
+	tween.tween_property(node, "position", Vector2(-30, 12), 4)
+	$ActionPanel/Container.add_child(node)
+	await tween.finished
+	if is_instance_valid(node):
+		node.queue_free()
 
 func play_hit(type = "heavy"):
 	var node = AudioStreamPlayer.new()
@@ -275,6 +303,19 @@ func play_hit(type = "heavy"):
 			return
 		$Player/AnimationPlayer.play("heavy_attack")
 	self.add_child(node)
+	
+	var tween = create_tween()
+	var tween2 = create_tween()
+	var checkbox = $ActionPanel/CheckBox
+	tween.tween_property(checkbox, "color", Color(255,255,255,0.5), 0.1)
+	tween.connect("finished", func():
+		checkbox.color = Color("000928e7")
+	)
+	
+	for node in $ActionPanel/Container.get_children():
+		if node.position.x >= 30 and node.position.x <= 45:
+			node.queue_free()
+	
 	node.play()
 	await node.finished
 	node.queue_free()

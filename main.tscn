@@ -166,17 +166,16 @@ script = ExtResource( "1_d10ep" )
 texture_filter = 1
 scale = Vector2(2, 2)
 frames = SubResource( "SpriteFrames_o7jje" )
-frame = 7
+frame = 6
 playing = true
 centered = false
 metadata/_edit_lock_ = true
 
 [node name="Player" type="Sprite2D" parent="."]
 texture_filter = 1
-position = Vector2(671, 582)
+position = Vector2(367, 575)
 scale = Vector2(3, 3)
 texture = ExtResource( "3_40q3q" )
-offset = Vector2(24, 0)
 region_enabled = true
 region_rect = Rect2(0, 0, 48, 48)
 
@@ -192,3 +191,29 @@ volume_db = -7.0
 [node name="WaterSoundEffectPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( "4_m0m7d" )
 volume_db = -25.0
+
+[node name="ActionPanel" type="Panel" parent="."]
+clip_contents = true
+minimum_size = Vector2(620, 48)
+offset_left = 326.0
+offset_top = 460.0
+offset_right = 806.0
+offset_bottom = 508.0
+
+[node name="CheckBox" type="ColorRect" parent="ActionPanel"]
+anchor_bottom = 1.0
+offset_left = 35.0
+offset_right = 67.0
+grow_vertical = 2
+color = Color(0, 0.0352941, 0.156863, 0.905882)
+metadata/_edit_layout_mode = 1
+metadata/_edit_use_custom_anchors = false
+
+[node name="Container" type="Control" parent="ActionPanel"]
+clip_contents = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_layout_mode = 1
+metadata/_edit_use_custom_anchors = false
