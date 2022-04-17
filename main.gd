@@ -221,10 +221,18 @@ var rhythm_part10_partern = {
 }
 
 var rhythm = {}
+var miss = 0
 
 var ActionIconScene = preload("res://ActionIcon.tscn")
 
 func _ready():
+	$Mask.visible = true
+	$Mask.color = Color("#000")
+	$CanvasLayer/Title.visible = true
+	$CanvasLayer/Title.modulate = Color("#fff")
+	$CanvasLayer/Restart.modulate = Color("#fff")
+	$CanvasLayer/Restart.visible = false
+	$CanvasLayer/Rank.modulate = Color("ffffff00")
 	dict_assin(rhythm_part2_partern, self.duplicate_next_rhythm_patern(rhythm_part2_partern))
 	dict_assin(rhythm_part3_partern, self.duplicate_next_rhythm_patern(rhythm_part3_partern))
 	dict_assin(rhythm_part4_partern, self.duplicate_next_rhythm_patern(rhythm_part4_partern))
@@ -247,22 +255,46 @@ func _ready():
 	dict_assin(rhythm, rhythm_part10_partern)
 
 	$Player/AnimationPlayer.play("idle")
-	
+	$Enemy/AnimationPlayer.play("idle")
 	$BgmPlayer.stream = song1
+
+func start():
+	self.miss = 0
+	self.start_rhythm()
+#	await self.get_tree().create_timer(0.1).timeout
 	$BgmPlayer.play()
 	
 	$WaterSoundEffectPlayer.play()
-	
-	$Enemy/AnimationPlayer.play("idle")
 	var animatopm_player = $Player/AnimationPlayer
 	$Player/AnimationPlayer.connect("animation_finished", 
 		func (anim):
 			if anim != "idle":
 				animatopm_player.play("idle") 
 	)
+	
+	await $BgmPlayer.finished
+	if miss == 0:
+		print_debug("pefect")
+		$CanvasLayer/Rank.text = $CanvasLayer/Rank.text.replace("{value}", "Perfect")
+	elif miss < 10:
+		print_debug("excellent")
+		$CanvasLayer/Rank.text = $CanvasLayer/Rank.text.replace("{value}", "Excellent")
+	elif miss < 30:
+		print_debug("good")
+		$CanvasLayer/Rank.text = $CanvasLayer/Rank.text.replace("{value}", "Good")
+	else:
+		$CanvasLayer/Rank.text = $CanvasLayer/Rank.text.replace("{value}", "Bad")
+	$AnimationPlayer.play("finished")
+	$CanvasLayer/Restart.grab_focus()
+	await $AnimationPlayer.animation_finished
+	
 
-	self.start_rhythm()
-
+func restart():
+	$CanvasLayer/Rank.text = "[center]Grade: [wave][color=e8c170]{value}[/color][/wave][/center]"
+	$AnimationPlayer.play("restart")
+	await $AnimationPlayer.animation_finished
+	self.start()
+	
 func start_rhythm():
 	for per in self.rhythm.keys():
 		var timer = self.get_tree().create_timer((per.to_float() - 7.7) * pb)
@@ -282,6 +314,7 @@ func start_rhythm():
 func create_action_icon(type):
 	var node = self.ActionIconScene.instantiate()
 	node.position.x = 580
+	node.type = type
 	if type == "heavy":
 		node.texture = self.icon_heavy
 	else:
@@ -292,6 +325,7 @@ func create_action_icon(type):
 	await tween.finished
 	if is_instance_valid(node):
 		node.queue_free()
+		miss += 1
 
 func play_hit(type = "heavy"):
 	var node = AudioStreamPlayer.new()
@@ -314,11 +348,12 @@ func play_hit(type = "heavy"):
 	)
 	
 	for node in $ActionPanel/Container.get_children():
-		if node.position.x >= 30 and node.position.x <= 50:
+		if node.position.x >= 30 and node.position.x <= 50 and node.type == type:
 			node.queue_free()
 
 	var enemy_player = $Enemy/AnimationPlayer
 	$Enemy/AnimationPlayer.play("hit")
+	$Camera2D.shake(50 if type == "light" else 80)
 	self.get_tree().create_timer(0.1).connect("timeout", func():
 		enemy_player.play("idle")
 	)
@@ -335,6 +370,12 @@ func duplicate_next_rhythm_patern(patern):
 	return res
 
 func _input(event):
+	if event.is_action_pressed("ui_accept") and $Mask.visible and $AnimationPlayer.current_animation != "start":
+		$AnimationPlayer.play("start")
+		await $AnimationPlayer.animation_finished
+		self.start()
+	if $Mask.visible:
+		return
 	if event.is_action_pressed("player_heavy_hit"):
 		self.play_hit("heavy")
 	elif event.is_action_pressed("player_light_hit"):
